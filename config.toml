@@ -1,7 +1,7 @@
 [bot]
-prefixes = ["c!", "d!"]
-description = """An example bot designed to get started quickly with discord.py"""
-playing = "Edit mah config"
+prefixes = ["t!", "!!"]
+description = """The TSP login andcommunity discord bot"""
+playing = "Télécom SudParis"
 commands_are_case_insensitive = true
 
 [database]
@@ -13,7 +13,7 @@ host = "127.0.0.1"
 port = "5432"
 user = "mybot"
 password = "mybot"
-database = "mybot"
+database = "tsp"
 
 [permissions.default]
 # Permissions work on a inheritance basis
@@ -59,9 +59,3 @@ cogs_to_load = ['jishaku', 'cogs.error_handling', 'cogs.simple_commands', 'cogs.
 # The name after cogs is the name of the class
 [cogs.SimpleCommands]
 hello_message = "Hello there!"
-
-[cogs.SupportServerCommands]
-# That's the ID of your server where the command will be ran
-support_server_id = 734810932529856652
-# ID of an empty channel that will be used as a status dashboard.
-status_channel_id = 734879974842171474
