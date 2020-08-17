@@ -21,14 +21,5 @@ class SimpleCommands(Cog):
         time_delta = round((t_2 - t_1) * 1000)  # calculate the time needed to trigger typing
         await ctx.send(_("Pong. — Time taken: {miliseconds}ms", miliseconds=time_delta))  # send a message telling the user the calculated ping time
 
-    @commands.command()
-    async def say_hello(self, ctx: MyContext):
-        """
-        Say hi with a customisable hello message. This is used to demonstrate cogs config usage
-        """
-        _ = await ctx.get_translate_function()
-
-        await ctx.send(_(self.config()["hello_message"]))
-
 
 setup = SimpleCommands.setup
