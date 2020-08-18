@@ -2,6 +2,7 @@
 Authenticate users to their Télécom SudParis accounts
 """
 import asyncio
+from collections import defaultdict
 from typing import Optional, List
 
 import discord
@@ -9,12 +10,17 @@ from discord.ext import commands
 from discord.utils import escape_markdown, escape_mentions
 
 from utils import checks
+from utils.bot_class import MyBot
 from utils.cog_class import Cog
 from utils.ctx_class import MyContext
 from utils.models import get_from_db
 
 
 class Authentication(Cog):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.concurrency_dict: dict = {}
+
     async def get_user_info(self, tsp_user) -> Optional[dict]:
         r = await self.bot.client_session.post(self.config()['check_login_url'], data={"login": tsp_user})
         res = await r.json()
@@ -59,19 +65,14 @@ class Authentication(Cog):
             roles_to_add.append(guild.get_role(mapping['personnel']))
 
         await member.add_roles(*roles_to_add, reason=f"Login for {ldap_info['uid']}")
-        await member.edit(nick=ldap_info['first_name'], reason=f"Anonymité interdite")
+        initial = ldap_info['last_name'].split()[-1][0].upper()
+        nick = f"{ldap_info['first_name']} {initial}.".title()
+        self.bot.logger.debug(f"Member {member.name}#{member.discriminator} ({member.id}) is getting renamed to {nick} following login.")
 
-    @Cog.listener(name="on_raw_reaction_add")
-    async def login_process(self, payload: discord.RawReactionActionEvent):
-        config = self.config()
-        if not config['reaction_channel_id'] == payload.channel_id:
-            return
-        elif not config['begin_login_emoji_id'] == payload.emoji.id:
-            return
 
-        member = payload.member
-        guild = member.guild
+        await member.edit(nick=nick, reason=f"Anonymité découragée")
 
+    async def login_interaction(self, member, guild):
         def message_check(message):
             return message.author.id == member.id and message.guild is None
 
@@ -117,6 +118,8 @@ class Authentication(Cog):
                 password_ok = await self.check_password(tsp_user=ldap_info['uid'], tsp_password=message.content)
                 if not password_ok:
                     await status.edit(content="❌ Votre mot de passe est incorrect. Veuillez réessayer en entrant votre mot de passe.")
+                else:
+                    db_user.tsp_password = message.content
 
         db_user.is_registered = True
         await db_user.save()
@@ -124,5 +127,26 @@ class Authentication(Cog):
         async with member.typing():
             await self.set_member_roles(member, ldap_info)
         await member.send("👌 Procédure terminée. **Pensez à supprimer votre mot de passe de ce chat** (clic sur les ..., puis supprimer).")
+
+    @Cog.listener(name="on_raw_reaction_add")
+    async def login_process(self, payload: discord.RawReactionActionEvent):
+        config = self.config()
+        if not config['reaction_channel_id'] == payload.channel_id:
+            return
+        elif not config['begin_login_emoji_id'] == payload.emoji.id:
+            return
+
+        member = payload.member
+        guild = member.guild
+        try:
+            if not self.concurrency_dict.get(member.id, False):
+                self.concurrency_dict[member.id] = True
+                await self.login_interaction(member, guild)
+            else:
+                return
+        except Exception as e:
+            self.bot.logger.exception("Error happened in login_interaction.")
+
+        del self.concurrency_dict[member.id]
 
 setup = Authentication.setup
