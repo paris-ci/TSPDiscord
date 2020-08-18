@@ -34,7 +34,7 @@ class Authentication(Cog):
     async def set_member_roles(self, member: discord.Member, ldap_info: dict):
         mapping = self.config()['roles_mapping']
         guild = member.guild
-        group:str = ldap_info['title']
+        group: str = ldap_info['title']
         await member.remove_roles(*[role for role in member.roles if role.id in self.config()['roles_mapping'].values()], reason=f"Login for {ldap_info['uid']}")
 
         roles_to_add = []
