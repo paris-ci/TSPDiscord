@@ -54,4 +54,24 @@ token = ""
 
 [cogs]
 # Names of cogs to load. Usually cogs.file_name_without_py
-cogs_to_load = ['jishaku', 'cogs.error_handling', 'cogs.simple_commands', 'cogs.background_loop', 'cogs.support_server_commands', 'cogs.database_commands', 'cogs.permissions_commands']
+cogs_to_load = ['jishaku', 'cogs.error_handling', 'cogs.simple_commands', 'cogs.background_loop',  'cogs.database_commands', 'cogs.permissions_commands', 'cogs.authentication']
+
+[cogs.Authentication]
+check_login_url = "https://choix.telecom-sudparis.eu/check_login"  # Hummm, une backdoor pour le LDAP. J'adore.
+reaction_channel_id = 744968789086699582
+begin_login_emoji_id = 744969309570465832
+
+[cogs.Authentication.roles_mapping]
+visiteur = 744971746402107462
+etudiant = 744970423703437352
+personnel = 744970469177950241
+
+FISE = 745006093016760321
+FIPA = 745006143499403375
+IMTBS = 745237797782421534
+
+1A = 745007158965436556
+2A = 745007176602353805
+3A = 745007188749058130
+4A = 745007200069746745
+

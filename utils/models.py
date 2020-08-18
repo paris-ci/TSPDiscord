@@ -13,10 +13,8 @@ class DiscordGuild(Model):
     id = fields.IntField(pk=True)
     discord_id = fields.BigIntField(index=True)
     name = fields.TextField()
-    prefix = fields.CharField(20, null=True)
-    permissions = fields.JSONField(default={})
 
-    language = fields.CharField(6, default="en")
+    language = fields.CharField(6, default="fr_FR")
 
     class Meta:
         table = "guilds"
@@ -51,7 +49,8 @@ class DiscordUser(Model):
     name = fields.TextField()
     discriminator = fields.CharField(4)
     last_modified = fields.DatetimeField(auto_now=True)
-    times_ran_example_command = fields.IntField(default=0)
+    tsp_login = fields.TextField(null=True)
+    is_registered = fields.BooleanField(default=False)
     permissions = fields.JSONField(default={})
 
     language = fields.CharField(6, default="en")
