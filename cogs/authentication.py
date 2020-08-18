@@ -32,6 +32,7 @@ class Authentication(Cog):
         pass
 
     async def set_member_roles(self, member: discord.Member, ldap_info: dict):
+        self.bot.logger.info(f"Member {member.name}#{member.discriminator} ({member.id}) has logged in as {ldap_info['uid']}.")
         mapping = self.config()['roles_mapping']
         guild = member.guild
         group: str = ldap_info['title']
@@ -122,6 +123,6 @@ class Authentication(Cog):
         await member.send(f"Merci beaucoup {ldap_info['first_name']}. Vous êtes maintenent connecté. Vous allez recevoir dans très peu de temps les roles réservés. Merci d'avoir uilisé la connection TSP sécurisée.")
         async with member.typing():
             await self.set_member_roles(member, ldap_info)
-        await member.send("👌 Procédure terminée.")
+        await member.send("👌 Procédure terminée. **Pensez à supprimer votre mot de passe de ce chat** (clic sur les ..., puis supprimer).")
 
 setup = Authentication.setup
