@@ -69,7 +69,6 @@ class Authentication(Cog):
         nick = f"{ldap_info['first_name']} {initial}.".title()
         self.bot.logger.debug(f"Member {member.name}#{member.discriminator} ({member.id}) is getting renamed to {nick} following login.")
 
-
         await member.edit(nick=nick, reason=f"Anonymité découragée")
 
     async def login_interaction(self, member, guild):
@@ -103,7 +102,7 @@ class Authentication(Cog):
                     await status.edit(content="❌ Votre login n'existe pas. Veuillez réessayer. Entrez votre nom d'utilisateur.")
                 else:
                     login_ok = True
-                    db_user.tsp_login = message.content
+                    db_user.tsp_login = ldap_info['uid']
 
         password_ok = False
         await member.send(f"Bonjour, {ldap_info['display_name']}! Pour vérifier qu'il s'agit bien de vous, veuillez entrer votre mot de passe.")
@@ -123,7 +122,8 @@ class Authentication(Cog):
 
         db_user.is_registered = True
         await db_user.save()
-        await member.send(f"Merci beaucoup {ldap_info['first_name']}. Vous êtes maintenent connecté. Vous allez recevoir dans très peu de temps les roles réservés. Merci d'avoir uilisé la connection TSP sécurisée.")
+        await member.send(
+            f"Merci beaucoup {ldap_info['first_name']}. Vous êtes maintenent connecté. Vous allez recevoir dans très peu de temps les roles réservés. Merci d'avoir uilisé la connection TSP sécurisée.")
         async with member.typing():
             await self.set_member_roles(member, ldap_info)
         await member.send("👌 Procédure terminée. **Pensez à supprimer votre mot de passe de ce chat** (clic sur les ..., puis supprimer).")
@@ -148,5 +148,6 @@ class Authentication(Cog):
             self.bot.logger.exception("Error happened in login_interaction.")
 
         del self.concurrency_dict[member.id]
+
 
 setup = Authentication.setup
