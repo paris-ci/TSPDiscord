@@ -157,12 +157,14 @@ class Authentication(Cog):
         if member_login:
             info = await self.get_user_info(member_login)
             pfp_url = self.config()['profile_picture_url'].format(login=info['uid'])
-            e = discord.Embed(colour=discord.Colour.green(), title=f"{info['display_name']}")
-            e.set_image(pfp_url)
+            e = discord.Embed(colour=discord.Colour.green(), title=f"{info['civilite']} {info['last_name']} {info['first_name']}")
+            e.set_thumbnail(url=pfp_url)
             e.set_author(name=f"{member.name}#{member.discriminator}", url=str(member.avatar_url), icon_url=str(member.avatar_url))
-            e.description = str(info)
+            e.add_field(name="Email", value=info['mail'])
+            e.add_field(name="Groupe", value=info['title'])
+            # e.add_field(name="Login", value=info['uid'])
         else:
-            e = discord.Embed(title="utilisateur introuvable dans la base de données.", description="Dites lui de s'enregister dans #bienvenue", colour=discord.Colour.red())
+            e = discord.Embed(title="Utilisateur introuvable dans la base de données.", description="Dites lui de s'enregister dans <#744968789086699582>", colour=discord.Colour.red())
 
         await ctx.send(embed=e)
 
