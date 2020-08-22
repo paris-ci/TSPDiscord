@@ -151,7 +151,7 @@ class Authentication(Cog):
         if not member:
             member = ctx.author
 
-        db_user: DiscordUser = get_from_db(member, as_user=True)
+        db_user: DiscordUser = await get_from_db(member, as_user=True)
 
         member_login = db_user.tsp_login
         if member_login:
