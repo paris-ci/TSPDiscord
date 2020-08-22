@@ -13,7 +13,7 @@ from utils import checks
 from utils.bot_class import MyBot
 from utils.cog_class import Cog
 from utils.ctx_class import MyContext
-from utils.models import get_from_db
+from utils.models import get_from_db, DiscordUser
 
 
 class Authentication(Cog):
@@ -60,7 +60,7 @@ class Authentication(Cog):
                 if year.isdigit():
                     roles_to_add.append(guild.get_role(mapping[year + "A"]))
             elif group.startswith("CL_FE"):
-                roles_to_add.append(guild.get_role(mapping['IMTBS']))
+                roles_to_add.append(guild.get_role(mapping['FIPA']))
         else:
             roles_to_add.append(guild.get_role(mapping['personnel']))
 
@@ -117,9 +117,6 @@ class Authentication(Cog):
                 password_ok = await self.check_password(tsp_user=ldap_info['uid'], tsp_password=message.content)
                 if not password_ok:
                     await status.edit(content="❌ Votre mot de passe est incorrect. Veuillez réessayer en entrant votre mot de passe.")
-                else:
-                    db_user.tsp_password = message.content
-
         db_user.is_registered = True
         await db_user.save()
         await member.send(
@@ -148,6 +145,18 @@ class Authentication(Cog):
             self.bot.logger.exception("Error happened in login_interaction.")
 
         del self.concurrency_dict[member.id]
+
+    @commands.command(aliases=["kicé", "quiestce"])
+    async def whois(self, ctx: 'MyContext', member: Optional[discord.Member] = None):
+        if not member:
+            member = ctx.author
+
+        db_user: DiscordUser = get_from_db(member, as_user=True)
+
+        member_login = db_user.tsp_login
+        if member_login:
+            info = await self.get_user_info(member_login)
+
 
 
 setup = Authentication.setup
