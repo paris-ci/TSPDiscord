@@ -156,6 +156,15 @@ class Authentication(Cog):
         member_login = db_user.tsp_login
         if member_login:
             info = await self.get_user_info(member_login)
+            pfp_url = self.config()['profile_picture_url'].format(login=info['uid'])
+            e = discord.Embed(colour=discord.Colour.green(), title=f"{info['display_name']}")
+            e.set_image(pfp_url)
+            e.set_author(name=f"{member.name}#{member.discriminator}", url=str(member.avatar_url), icon_url=str(member.avatar_url))
+            e.description = str(info)
+        else:
+            e = discord.Embed(title="utilisateur introuvable dans la base de données.", description="Dites lui de s'enregister dans #bienvenue", colour=discord.Colour.red())
+
+        await ctx.send(embed=e)
 
 
 

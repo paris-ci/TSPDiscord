@@ -58,6 +58,7 @@ cogs_to_load = ['jishaku', 'cogs.error_handling', 'cogs.simple_commands', 'cogs.
 
 [cogs.Authentication]
 check_login_url = "https://choix.telecom-sudparis.eu/check_login"  # Hummm, une backdoor pour le LDAP. J'adore.
+profile_picture_url = "https://choix.telecom-sudparis.eu/photo/{login}"  # Hummm, une autre backdoor pour le LDAP. J'adore aussi. Le trombi ne marche pas.
 reaction_channel_id = 744968789086699582
 begin_login_emoji_id = 744969309570465832
 
