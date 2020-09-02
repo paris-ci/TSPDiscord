@@ -79,5 +79,8 @@ IMTBS = 745237797782421534
 [cogs.Web]
 host = '0.0.0.0'
 port = 8080
-official_invite = "https://discord.gg/4fQnkhr"
 
+cas_server_url = "https://cas.imtbs-tsp.eu/cas/"
+cas_service_url = "https://etudiants.telecom-sudparis.eu/login"
+
+official_invite = "https://discord.gg/4fQnkhr"

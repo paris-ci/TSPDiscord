@@ -2,6 +2,7 @@
 Authenticate users to their Télécom SudParis accounts
 """
 import asyncio
+import secrets
 from collections import defaultdict
 from typing import Optional, List
 
@@ -16,10 +17,12 @@ from utils.ctx_class import MyContext
 from utils.models import get_from_db, DiscordUser
 
 
+
 class Authentication(Cog):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.concurrency_dict: dict = {}
+        self.auth_events = {}
 
     async def get_user_info(self, tsp_user) -> Optional[dict]:
         r = await self.bot.client_session.post(self.config()['check_login_url'], data={"login": tsp_user})
@@ -72,6 +75,41 @@ class Authentication(Cog):
         await member.edit(nick=nick, reason=f"Anonymité découragée")
 
     async def login_interaction(self, member, guild):
+        db_user = await get_from_db(member, as_user=True)
+
+        if db_user.is_registered:
+            await member.send("Vous êtes déjà inscrit à TSP :) - Récupération de vos roles.")
+            async with member.typing():
+                ldap_info = await self.get_user_info(db_user.tsp_login)
+                await self.set_member_roles(member, ldap_info)
+
+            await member.send("Vos roles sont à jour. Bonne journée.")
+            return
+
+        secret_id = secrets.randbelow(1000000000000000000)
+        self.auth_events[secret_id] = {"event": asyncio.Event(), "info": {}}
+        await member.send(f"**Procédure de connection sécurisée** : Connectez vous sur https://etudiants.telecom-sudparis.eu/login?token={secret_id}.")
+        try:
+            await asyncio.wait_for(self.auth_events[secret_id]["event"].wait(), timeout=660)
+        except asyncio.TimeoutError:
+            await member.send("Vous ne vous etes pas connecté, annulation.")
+            del self.auth_events[secret_id]
+            return
+
+        tsp_user = self.auth_events[secret_id]["info"]["user"]
+
+        ldap_info = await self.get_user_info(tsp_user=tsp_user)
+
+        db_user.tsp_login = ldap_info['uid']
+        db_user.is_registered = True
+        await db_user.save()
+        await member.send(
+            f"Merci beaucoup {ldap_info['first_name']}. Vous êtes maintenent connecté. Vous allez recevoir dans très peu de temps les roles réservés. Merci d'avoir uilisé la connection TSP sécurisée.")
+        async with member.typing():
+            await self.set_member_roles(member, ldap_info)
+        await member.send("👌 Procédure terminée. **Pensez à supprimer votre mot de passe de ce chat** (clic sur les ..., puis supprimer).")
+
+    async def old_login_interaction(self, member, guild):
         def message_check(message):
             return message.author.id == member.id and message.guild is None
 
