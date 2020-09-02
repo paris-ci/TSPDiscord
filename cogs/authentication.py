@@ -88,7 +88,7 @@ class Authentication(Cog):
 
         secret_id = secrets.randbelow(1000000000000000000)
         self.auth_events[secret_id] = {"event": asyncio.Event(), "info": {}}
-        await member.send(f"**Procédure de connection sécurisée** : Connectez vous sur https://etudiants.telecom-sudparis.eu/login?token={secret_id}.")
+        await member.send(f"**Procédure de connection sécurisée** : Connectez vous sur https://etudiants.telecom-sudparis.eu/login?token={secret_id}")
         try:
             await asyncio.wait_for(self.auth_events[secret_id]["event"].wait(), timeout=660)
         except asyncio.TimeoutError:
@@ -107,61 +107,7 @@ class Authentication(Cog):
             f"Merci beaucoup {ldap_info['first_name']}. Vous êtes maintenent connecté. Vous allez recevoir dans très peu de temps les roles réservés. Merci d'avoir uilisé la connection TSP sécurisée.")
         async with member.typing():
             await self.set_member_roles(member, ldap_info)
-        await member.send("👌 Procédure terminée. **Pensez à supprimer votre mot de passe de ce chat** (clic sur les ..., puis supprimer).")
-
-    async def old_login_interaction(self, member, guild):
-        def message_check(message):
-            return message.author.id == member.id and message.guild is None
-
-        db_user = await get_from_db(member, as_user=True)
-
-        if db_user.is_registered:
-            await member.send("Vous êtes déjà inscrit à TSP :) - Récupération de vos roles.")
-            async with member.typing():
-                ldap_info = await self.get_user_info(db_user.tsp_login)
-                await self.set_member_roles(member, ldap_info)
-
-            await member.send("Vos roles sont à jour. Bonne journée.")
-            return
-
-        await member.send("**Procédure de connection sécurisée** : Entrez votre nom d'utilisateur ou votre email TSP.")
-        login_ok = False
-
-        while not login_ok:
-            try:
-                message: discord.Message = await self.bot.wait_for('message', timeout=600, check=message_check)
-            except asyncio.TimeoutError:
-                await member.send("Vous n'avez pas répondu dans la durée impartie, annulation de la connexion.")
-                return
-            status = await member.send("Vérifications en cours, patientez SVP...")
-            async with member.typing():
-                ldap_info = await self.get_user_info(tsp_user=message.content)
-                if not ldap_info:
-                    await status.edit(content="❌ Votre login n'existe pas. Veuillez réessayer. Entrez votre nom d'utilisateur.")
-                else:
-                    login_ok = True
-                    db_user.tsp_login = ldap_info['uid']
-
-        password_ok = False
-        await member.send(f"Bonjour, {ldap_info['display_name']}! Pour vérifier qu'il s'agit bien de vous, veuillez entrer votre mot de passe.")
-        while not password_ok:
-            try:
-                message: discord.Message = await self.bot.wait_for('message', timeout=600, check=message_check)
-            except asyncio.TimeoutError:
-                await member.send("Vous n'avez pas répondu dans la durée impartie, annulation de la connexion. Rien n'a été sauvegardé.")
-                return
-            status = await member.send("Vérifications en cours, patientez SVP...")
-            with member.typing():
-                password_ok = await self.check_password(tsp_user=ldap_info['uid'], tsp_password=message.content)
-                if not password_ok:
-                    await status.edit(content="❌ Votre mot de passe est incorrect. Veuillez réessayer en entrant votre mot de passe.")
-        db_user.is_registered = True
-        await db_user.save()
-        await member.send(
-            f"Merci beaucoup {ldap_info['first_name']}. Vous êtes maintenent connecté. Vous allez recevoir dans très peu de temps les roles réservés. Merci d'avoir uilisé la connection TSP sécurisée.")
-        async with member.typing():
-            await self.set_member_roles(member, ldap_info)
-        await member.send("👌 Procédure terminée. **Pensez à supprimer votre mot de passe de ce chat** (clic sur les ..., puis supprimer).")
+        await member.send("👌 Procédure terminée.")
 
     @Cog.listener(name="on_raw_reaction_add")
     async def login_process(self, payload: discord.RawReactionActionEvent):
