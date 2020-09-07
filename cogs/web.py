@@ -52,9 +52,15 @@ class Web(Cog):
             if token:
                 session['token'] = token
 
+            if not session['token'] or not str(session['token']).isdigit():
+                return web.Response(text="Vous n'avez pas de token/token invalide.")
+
             token = int(session['token'])
-            if not token:
-                return web.Response(text="Vous n'avez pas de token.")
+            auth_cog = self.bot.get_cog("Authentication")
+
+            if not token in auth_cog.auth_events.keys():
+                return web.Response(text="Votre token à expiré. Relancez la procédure d'authentification depuis discord.")
+
 
             ticket = request.query.get('ticket', None)
             user = request.query.get('user', None)
@@ -62,7 +68,6 @@ class Web(Cog):
             if ticket:
                 user, attributes, pgtiou = self.cas_client.verify_ticket(ticket)
                 if user:
-                    auth_cog = self.bot.get_cog("Authentication")
                     auth_cog.auth_events[token]["info"] = {"user": user, "attributes": attributes}
                     auth_cog.auth_events[token]["event"].set()
 

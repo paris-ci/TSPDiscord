@@ -11,7 +11,7 @@ from utils.interaction import escape_everything
 from babel import dates
 
 class CommandErrorHandler(Cog):
-    @commands.Cog.listener()
+    @Cog.listener()
     async def on_command_error(self, ctx: MyContext, exception: Exception) -> None:
         _ = await ctx.get_translate_function()
 
