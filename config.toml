@@ -54,7 +54,7 @@ token = ""
 
 [cogs]
 # Names of cogs to load. Usually cogs.file_name_without_py
-cogs_to_load = ['jishaku', 'cogs.error_handling', 'cogs.simple_commands', 'cogs.background_loop',  'cogs.database_commands', 'cogs.permissions_commands', 'cogs.authentication', 'cogs.web']
+cogs_to_load = ['jishaku', 'cogs.error_handling', 'cogs.simple_commands', 'cogs.background_loop',  'cogs.database_commands', 'cogs.permissions_commands', 'cogs.authentication', 'cogs.web', 'cogs.bonjour']
 
 [cogs.Authentication]
 check_login_url = "https://choix.telecom-sudparis.eu/check_login"  # Hummm, une backdoor pour le LDAP. J'adore.
@@ -84,3 +84,7 @@ cas_server_url = "https://cas.imtbs-tsp.eu/cas/"
 cas_service_url = "https://etudiants.telecom-sudparis.eu/login"
 
 official_invite = "https://discord.gg/4fQnkhr"
+
+
+[cogs.Bonjour]
+emoji_hello = "👋"
